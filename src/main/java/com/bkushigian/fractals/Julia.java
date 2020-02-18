@@ -33,6 +33,7 @@ public class Julia extends ComplexFractal {
     public Julia(int width, int height, ColorScheme colorScheme) {
         this(width, height, colorScheme, null);
         this.c = new Complex(0.365, 0.11);
+        fractalName = "julia";
     }
 
     public Julia(int width, int height, ColorScheme colorScheme, Complex c) {

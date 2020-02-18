@@ -7,7 +7,9 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 
 /**
@@ -232,8 +234,9 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
             updated = true;
         } else if (e.getSource() == exit) {
             try {
+                final String d = (new SimpleDateFormat("-dd-MM-yyyy_HH-mm-ss")).format(new Date());
                 System.out.println("Writing file");
-                writeToImage(fractalName, "png");
+                writeToImage(fractalName + d, "png");
                 System.out.println("done! ");
             } catch (IOException ex) {
                 ex.printStackTrace();
