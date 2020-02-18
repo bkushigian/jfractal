@@ -1,8 +1,12 @@
 package com.bkushigian.fractals;
 
 import java.awt.*;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -20,6 +24,8 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
                              SHIFTED_LEFT = 3,
                              SHIFTED_RIGHT = 4;
 
+    protected String fractalName = "fractal";
+
     protected final int numWorkers = 12;
     /**
      * How much have we shifted since the last compute()? This makes moving up/down/left/right
@@ -36,6 +42,10 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
 
     // has this been updated since the last time iterMatrix was computed?
     protected boolean updated = true;
+
+    /**
+     * height x width, with origin (0,0) in to left corner
+     */
     private int[][] iterMatrix;
 
     /**
@@ -221,6 +231,13 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
             zoomDepth *= zoomInFactor;
             updated = true;
         } else if (e.getSource() == exit) {
+            try {
+                System.out.println("Writing file");
+                writeToImage(fractalName, "png");
+                System.out.println("done! ");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             System.exit(0);
         }
         else if (e.getSource() == increaseMaxIter) {
@@ -250,7 +267,9 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         for (int w = 0; w < numWorkers; ++w) {
             int start = w*delta;
             int end = Math.min((w+1)*delta, height);
-            final Thread t = new Thread(new IterWorker(0, width, start, end));
+            final IterWorker worker = new IterWorker(0, width, start, end);
+            final Thread t = new Thread(worker);
+            System.out.println("Spawned worker: " + worker);
             threads.add(t);
             t.start();
         }
@@ -269,9 +288,7 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         compute();
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
-                final Complex z = pointFromPixel(i,j);
-                final int iters = calculateIterations(z);
-                final Color c = getColor(iters);
+                final Color c = getColor(iterMatrix[j][i]);
                 g.setColor(c);
                 g.fillRect(i,j,1,1);    // A super dumb way to draw a pixel
             }
@@ -387,6 +404,10 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         Color getColor(int iter) {
             return new Color(r(iter), g(iter), b(iter));
         }
+
+        int getColorInt(int iter) {
+            return (r(iter) << 16) | (g(iter) << 8) | b(iter);
+        }
     }
 
     class IterWorker implements Runnable {
@@ -407,12 +428,40 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         public void run() {
             for (int j = heightStart; j < heightEnd; ++j) {
                 for (int i = widthStart; i < widthEnd; ++i ) {
-                    Complex z = pointFromPixel(i,j);
-                    int iters = calculateIterations(z);
+                    final Complex z = pointFromPixel(i,j);
+                    final int iters = calculateIterations(z);
                     iterMatrix[j][i] = iters;
                 }
             }
-
         }
+
+        @Override
+        public String toString() {
+            return "IterWorker{" +
+                    "widthStart=" + widthStart +
+                    ", widthEnd=" + widthEnd +
+                    ", heightStart=" + heightStart +
+                    ", heightEnd=" + heightEnd +
+                    '}';
+        }
+    }
+
+    public BufferedImage createBufferedImage() {
+        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        int[] rgbData = new int[width * height];
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+                final int iters = iterMatrix[i][j];
+                final int colorInt = colorScheme.getColorInt(iters);
+                rgbData[i * width + j] = colorInt;
+            }
+        }
+        bi.setRGB(0, 0, width, height, rgbData, 0, width);
+        return bi;
+    }
+
+    public void writeToImage(String name, String ext) throws IOException {
+        File fileName = new File(String.format("%s.%s", name, ext));
+        ImageIO.write(createBufferedImage(), ext, fileName);
     }
 }

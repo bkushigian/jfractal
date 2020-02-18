@@ -1,5 +1,6 @@
 package com.bkushigian.fractals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,17 +32,21 @@ public class Newton extends ComplexFractal {
 
     public Newton(int width, int height) {
         this(width, height, null);
-        colorScheme = new ColorScheme(2, 155, 24, 0, 0, 0);
+        colorScheme = new ColorScheme(
+                27, 155,
+                30, 155,
+                31, 155);
         updateColors();
+        this.fractalName = "newton";
     }
 
     public Newton(int width, int height, ColorScheme colorScheme) {
-        this(width, height, colorScheme, ComplexPolynomial.of(Complex.negOne, Complex.one, Complex.one, Complex.i));
+        this(width, height, colorScheme, ComplexPolynomial.of(Complex.negOne, Complex.zero, Complex.zero, Complex.zero, Complex.i));
     }
 
     public Newton(int width, int height, ColorScheme colorScheme, ComplexPolynomial p) {
         super(width, height, colorScheme, -2.0, 2.0);
-        maxIterations = 128;
+        maxIterations = 256;
 
         this.p = p;
         this.newton = new NewtonApproximator(p);
@@ -80,7 +85,8 @@ public class Newton extends ComplexFractal {
 
     public static void main(String[] args) {
         DisplayWindow window = new DisplayWindow();
-        window.addPanel(new Newton(1000, 1000));
+        Newton n;
+        window.addPanel(n = new Newton(1500, 1500));
         window.showFrame();
     }
 }

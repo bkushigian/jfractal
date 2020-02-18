@@ -1,6 +1,9 @@
 package com.bkushigian.fractals;
 
+import java.io.IOException;
+
 public class Mandelbrot extends ComplexFractal {
+
 
     public Mandelbrot() {
         this(700, 700);
@@ -8,12 +11,13 @@ public class Mandelbrot extends ComplexFractal {
 
     public Mandelbrot(int width, int height) {
         this(width, height, null);
-        colorScheme = new ColorScheme(2, 155, 24, 0, 0, 0);
+        colorScheme = new ColorScheme(12, 0, 24, 155, 0, 0);
         updateColors();
     }
 
     public Mandelbrot(int width, int height, ColorScheme colorScheme) {
         super(width, height, colorScheme);
+        this.fractalName = "mandelbrot";
     }
 
     /**
@@ -33,7 +37,7 @@ public class Mandelbrot extends ComplexFractal {
     }
 
     public static void main(String[] args) {
-        Mandelbrot mandel = new Mandelbrot(1300, 900);
+        Mandelbrot mandel = new Mandelbrot(1200, 1200);
         DisplayWindow window = new DisplayWindow();
         window.addPanel(mandel);
         window.showFrame();
