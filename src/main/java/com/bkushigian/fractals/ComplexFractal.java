@@ -113,6 +113,9 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
     protected ComplexFractal(int width, int height, ColorScheme colorScheme, double xmin, double xmax) {
         this.width = width;
         this.height = height;
+        if (colorScheme == null) {
+            colorScheme = new ColorScheme(2,155, 0, 0, 24, 0);
+        }
         this.colorScheme = colorScheme;
         iterMatrix = new int[height][width];
         xMin = xmin;
@@ -133,11 +136,7 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         setPreferredSize(new Dimension(width, height));
         calculateDeltas();
 
-        colors = null;
-        if (this.colorScheme != null) {
-            colors = new Color[maxIterations];
-            updateColors();
-        }
+        updateColors();
     }
 
     /**
@@ -250,6 +249,7 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         }
         else if (e.getSource() == decreaseMaxIter) {
             maxIterations = maxIterations < 64 ? 128: maxIterations - 64;
+            if (maxIterations == 0) maxIterations = 64;
         } else if (e.getSource() == toggleKey) {
             showKey ^= true;
             updated = true;
@@ -374,44 +374,6 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         }
     }
 
-
-    public class ColorScheme {
-        final int rScale, gScale, bScale, rOffset, gOffset, bOffset;
-        public ColorScheme(int redScale, int redOffset, int greenScale, int greenOffset, int blueScale, int blueOffset) {
-            rScale = redScale;
-            gScale = greenScale;
-            bScale = blueScale;
-            rOffset = redOffset;
-            gOffset = greenOffset;
-            bOffset = blueOffset;
-        }
-
-        int r(int iter) {
-            return iter == maxIterations ?
-                    0:
-                    (iter * rScale + rOffset) % 256;
-        }
-
-        int g(int iter) {
-            return iter == maxIterations ?
-                    0:
-                    (iter * gScale + gOffset) % 256;
-        }
-
-        int b(int iter) {
-            return iter == maxIterations ?
-                    0:
-                    (iter * bScale + bOffset) % 256;
-        }
-
-        Color getColor(int iter) {
-            return new Color(r(iter), g(iter), b(iter));
-        }
-
-        int getColorInt(int iter) {
-            return (r(iter) << 16) | (g(iter) << 8) | b(iter);
-        }
-    }
 
     class IterWorker implements Runnable {
 

@@ -26,7 +26,9 @@ public class ComplexPolynomial {
         Complex coef;
         for (int d = 0; d < degree; ++d) {
             coef = coefficients[d];
-            result = result.plus(coef.times(pt.power(d)));
+            if (coef != Complex.zero) {
+                result = result.plus(coef.times(pt.power(d)));
+            }
         }
         return result;
     }
@@ -63,5 +65,20 @@ public class ComplexPolynomial {
     @Override
     public int hashCode() {
         return Arrays.hashCode(coefficients);
+    }
+
+    /**
+     * Return a polynomial representing the n roots of unity z^n - 1
+     * @param n degree of root of unity
+     * @return a polynomial representing the n roots of unity
+     */
+    public static ComplexPolynomial nthRootsOfUnity(int n) {
+        if (n == 0) return ComplexPolynomial.of(Complex.negOne);
+        if (n < 0) n = - n;
+        Complex[] coeffs = new Complex[n + 1];
+        coeffs[0] = Complex.negOne;
+        coeffs[n] = Complex.one;
+        for (int i = 1; i < n; ++i) coeffs[i] = Complex.zero;
+        return ComplexPolynomial.of(coeffs);
     }
 }

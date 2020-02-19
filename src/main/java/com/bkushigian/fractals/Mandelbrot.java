@@ -1,7 +1,5 @@
 package com.bkushigian.fractals;
 
-import java.io.IOException;
-
 public class Mandelbrot extends ComplexFractal {
 
 

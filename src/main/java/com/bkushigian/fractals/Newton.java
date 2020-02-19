@@ -1,8 +1,6 @@
 package com.bkushigian.fractals;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.awt.*;
 
@@ -32,26 +30,28 @@ public class Newton extends ComplexFractal {
 
     public Newton(int width, int height) {
         this(width, height, null);
-        colorScheme = new ColorScheme(
-                27, 155,
-                30, 155,
-                31, 155);
         updateColors();
-        this.fractalName = "newton";
     }
 
     public Newton(int width, int height, ColorScheme colorScheme) {
-        this(width, height, colorScheme, ComplexPolynomial.of(Complex.negOne, Complex.zero, Complex.zero, Complex.zero, Complex.i));
+        this(width, height, colorScheme, ComplexPolynomial.of(Complex.negOne, Complex.zero, Complex.zero, Complex.one));
     }
 
     public Newton(int width, int height, ColorScheme colorScheme, ComplexPolynomial p) {
         super(width, height, colorScheme, -2.0, 2.0);
         maxIterations = 256;
-
+        if (colorScheme == null) {
+            colorScheme = new ColorScheme(
+                    27, 155,
+                    30, 155,
+                    31, 155);
+        }
+        this.colorScheme = colorScheme;
         this.p = p;
         this.newton = new NewtonApproximator(p);
         this.roots = new ArrayList<>(this.p.degree);
         showKey = false;
+        this.fractalName = "newton";
     }
 
     /**
@@ -85,8 +85,11 @@ public class Newton extends ComplexFractal {
 
     public static void main(String[] args) {
         DisplayWindow window = new DisplayWindow();
-        Newton n;
-        window.addPanel(n = new Newton(1500, 1500));
+        window.addPanel(new Newton(1200, 1200, new ColorScheme(
+                2, 155,
+                0, 0,
+                24, 32
+        ), ComplexPolynomial.nthRootsOfUnity(7)));
         window.showFrame();
     }
 }
