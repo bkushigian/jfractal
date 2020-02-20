@@ -249,7 +249,6 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         }
         else if (e.getSource() == decreaseMaxIter) {
             maxIterations = maxIterations < 64 ? 128: maxIterations - 64;
-            if (maxIterations == 0) maxIterations = 64;
         } else if (e.getSource() == toggleKey) {
             showKey ^= true;
             updated = true;
