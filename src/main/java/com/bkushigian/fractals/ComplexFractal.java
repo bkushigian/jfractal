@@ -8,9 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * An iterative fractal in the complex plane, this takes care of most of the work
@@ -103,6 +101,8 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
     JButton exit;
     JButton toggleKey;
 
+    Map<JButton, String> buttonNames;
+
 
     java.util.List<JButton> buttons;
 
@@ -121,16 +121,18 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         xMin = xmin;
         xMax = xmax;
         buttons = new LinkedList<>();
-        left  = new JButton("⇐");
-        right = new JButton("⇒");
-        up    = new JButton("⇑");
-        down  = new JButton("⇓");
-        in    = new JButton("\uD83D\uDD0E +");
-        out   = new JButton("\uD83D\uDD0E -");
-        exit  = new JButton("✗");
-        increaseMaxIter = new JButton("▩");
-        decreaseMaxIter = new JButton("□");
-        toggleKey = new JButton("\uD83D\uDD11");
+
+        buttonNames = new HashMap<>();
+        left  = new JButton("⇐"); buttonNames.put(left, "left");
+        right = new JButton("⇒"); buttonNames.put(right, "right");
+        up    = new JButton("⇑"); buttonNames.put(up, "up");
+        down  = new JButton("⇓"); buttonNames.put(down, "down");
+        in    = new JButton("\uD83D\uDD0E +"); buttonNames.put(in, "in");
+        out   = new JButton("\uD83D\uDD0E -"); buttonNames.put(out, "out");
+        exit  = new JButton("✗"); buttonNames.put(exit, "exit");
+        increaseMaxIter = new JButton("▩"); buttonNames.put(increaseMaxIter, "increaseMaxIter");
+        decreaseMaxIter = new JButton("□"); buttonNames.put(decreaseMaxIter, "decreaseMaxIter");
+        toggleKey = new JButton("toggleKey"); buttonNames.put(toggleKey, "toggleKey");
 
         addButton(left, right, up, down, in, out, increaseMaxIter, decreaseMaxIter, toggleKey, exit);
         setPreferredSize(new Dimension(width, height));
@@ -186,28 +188,32 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e){
         System.out.println("ActionEvent: " + e.getActionCommand());
         System.out.println(">>> updated = " + updated);
-        if (e.getSource() == left) {
+        final Object source = e.getSource();
+        if (source instanceof JButton) {
+            System.out.println("Button: " + buttonNames.get((JButton) source));
+        }
+        if (source == left) {
             double shift = delta * shiftAmount;
             xMax -= shift;
             xMin -= shift;
             updated = true;
 
-        } else if (e.getSource() == right) {
+        } else if (source == right) {
             double shift = delta * shiftAmount;
             xMax += shift;
             xMin += shift;
             updated = true;
 
-        } else if (e.getSource() == up) {
+        } else if (source == up) {
             double shift = delta * shiftAmount;
             yCenter += shift;
             updated = true;
 
-        } else if (e.getSource() == down) {
+        } else if (source == down) {
             double shift = delta * shiftAmount;
             yCenter -= shift;
             updated = true;
-        } else if (e.getSource() == in) {
+        } else if (source == in) {
             double center = (xMin + xMax) / 2;
             double diff = xMax - center;
             xMin = center - zoomInFactor * diff ;
@@ -219,7 +225,7 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
             yMax = center + zoomInFactor * diff ;
             zoomDepth *= zoomOutFactor;
             updated = true;
-        } else if (e.getSource() == out) {
+        } else if (source == out) {
             double center = (xMin + xMax) / 2;
             double diff = xMax - center;
             xMin = center - zoomOutFactor * diff ;
@@ -231,7 +237,7 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
             yMax = center + zoomOutFactor * diff ;
             zoomDepth *= zoomInFactor;
             updated = true;
-        } else if (e.getSource() == exit) {
+        } else if (source == exit) {
             try {
                 final String d = (new SimpleDateFormat("-dd-MM-yyyy_HH-mm-ss")).format(new Date());
                 System.out.println("Writing file");
@@ -242,15 +248,16 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
             }
             System.exit(0);
         }
-        else if (e.getSource() == increaseMaxIter) {
+        else if (source == increaseMaxIter) {
             maxIterations = maxIterations < 64 ? 64 : maxIterations + 64;
             updateColors();
             updated = true;
         }
-        else if (e.getSource() == decreaseMaxIter) {
+        else if (source == decreaseMaxIter) {
             maxIterations = maxIterations < 64 ? 128: maxIterations - 64;
-        } else if (e.getSource() == toggleKey) {
-            showKey ^= true;
+        } else if (source == toggleKey) {
+            showKey = ! showKey;
+            System.out.println("showKey = " + showKey);
             updated = true;
         }
 
@@ -304,11 +311,15 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
      * @return the color corresponding to {@code colorNumber}
      */
     public Color getColor(int colorNumber) {
-        final int c = colorNumber % maxIterations;
-        return colors[c];
+        if (maxIterations != 0) {
+            final int c = colorNumber % maxIterations;
+            return colors[c];
+        }
+        return colors[0];
     }
 
     protected void drawKey(Graphics g) {
+        System.out.println("drawKey(Graphics): showKey = " + showKey);
 
         if (showKey) {
             final String[] toDraw = new String[]{
@@ -324,6 +335,8 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
 
 
     protected void drawKey(Graphics g, String[] lines) {
+        System.out.println("drawKey(Graphics, String[]): showKey = " + showKey);
+
         if (showKey) {
             if (keyLineHeight < 0) {
                 keyLineHeight = g.getFontMetrics().getMaxAscent();
