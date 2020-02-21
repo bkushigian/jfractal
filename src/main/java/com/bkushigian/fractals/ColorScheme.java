@@ -39,4 +39,24 @@ public class ColorScheme {
     int getColorInt(int iter) {
         return (r(iter) << 16) | (g(iter) << 8) | b(iter);
     }
+
+    public static class BWColorScheme extends ColorScheme {
+        public BWColorScheme() {
+            super(0,0,0,0,0,0);
+        }
+        @Override
+        int r(int iter) {
+            return (iter % 2) * 255;
+        }
+
+        @Override
+        int g(int iter) {
+            return (iter % 2) * 255;
+        }
+
+        @Override
+        int b(int iter) {
+            return (iter % 2) * 255;
+        }
+    }
 }

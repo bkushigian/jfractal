@@ -25,28 +25,24 @@ public class Julia extends ComplexFractal {
     }
 
     public Julia(int width, int height) {
-        this(width, height, null);
-        colorScheme = new ColorScheme(2, 155, 24, 0, 0, 0);
-        updateColors();
+        this(width, height, new ColorScheme.BWColorScheme());
     }
 
     public Julia(int width, int height, ColorScheme colorScheme) {
         this(width, height, colorScheme, null);
         this.c = new Complex(0.365, 0.11);
-        fractalName = "julia";
     }
 
     public Julia(int width, int height, ColorScheme colorScheme, Complex c) {
-        super(width, height, colorScheme, -2.0, 2.0);
+        super(width, height, colorScheme, -2.0, 2.0, -2.0, 2.0);
         this.c = c;
         maxIterations = 128;
-        moveCUp = new JButton("C↑");
-        moveCDown = new JButton("C↓");
-        moveCLeft = new JButton("C←");
-        moveCRight = new JButton("C→");
-        increaseCDelta = new JButton("++ΔC");
-        decreaseCDelta = new JButton("--ΔC");
-        addButton(moveCUp, moveCDown, moveCLeft, moveCRight, increaseCDelta, decreaseCDelta);
+        moveCUp = registerButton("C↑", "move-C-up");
+        moveCDown = registerButton("C↓", "move-C-down");
+        moveCLeft = registerButton("C←", "move-C-left");
+        moveCRight = registerButton("C→", "move-C-right");
+        increaseCDelta = registerButton("++ΔC", "increase-delta");
+        decreaseCDelta = registerButton("--ΔC", "decreaseDelta");
     }
 
     @Override
@@ -72,6 +68,11 @@ public class Julia extends ComplexFractal {
             cDelta = newCDelta <= minDelta ? minDelta : newCDelta;
         }
         super.actionPerformed(e);
+    }
+
+    @Override
+    public String getFractalName() {
+        return "julia";
     }
 
     /**

@@ -8,14 +8,17 @@ public class Mandelbrot extends ComplexFractal {
     }
 
     public Mandelbrot(int width, int height) {
-        this(width, height, null);
-        colorScheme = new ColorScheme(12, 0, 24, 155, 0, 0);
+        this(width, height, new ColorScheme.BWColorScheme());
         updateColors();
     }
 
     public Mandelbrot(int width, int height, ColorScheme colorScheme) {
         super(width, height, colorScheme);
-        this.fractalName = "mandelbrot";
+    }
+
+    @Override
+    public String getFractalName() {
+        return "mandelbrot";
     }
 
     /**

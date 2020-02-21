@@ -38,7 +38,7 @@ public class Newton extends ComplexFractal {
     }
 
     public Newton(int width, int height, ColorScheme colorScheme, ComplexPolynomial p) {
-        super(width, height, colorScheme, -2.0, 2.0);
+        super(width, height, colorScheme, -2.0, 2.0, -2.0, 2.0);
         maxIterations = 256;
         if (colorScheme == null) {
             colorScheme = new ColorScheme(
@@ -51,7 +51,6 @@ public class Newton extends ComplexFractal {
         this.newton = new NewtonApproximator(p);
         this.roots = new ArrayList<>(this.p.degree);
         showKey = false;
-        this.fractalName = "newton";
     }
 
     /**
@@ -91,5 +90,10 @@ public class Newton extends ComplexFractal {
                 24, 32
         ), ComplexPolynomial.nthRootsOfUnity(7)));
         window.showFrame();
+    }
+
+    @Override
+    public String getFractalName() {
+        return "newton";
     }
 }

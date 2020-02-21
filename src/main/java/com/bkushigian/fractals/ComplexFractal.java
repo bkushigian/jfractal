@@ -16,7 +16,7 @@ import java.util.*;
  *
  * Certain functionality, such as drawing a key with relevant data, included.
  */
-public abstract class ComplexFractal extends JPanel implements ActionListener {
+public abstract class ComplexFractal extends Fractal {
 
     private final static int NOT_SHIFTED = 0,
                              SHIFTED_DOWN = 1,
@@ -24,9 +24,7 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
                              SHIFTED_LEFT = 3,
                              SHIFTED_RIGHT = 4;
 
-    protected String fractalName = "fractal";
 
-    protected final int numWorkers = 12;
     /**
      * How much have we shifted since the last compute()? This makes moving up/down/left/right
      * more efficient.
@@ -34,85 +32,34 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
     private int shiftedStatus = NOT_SHIFTED;
     private int shiftedAmount = 0;
 
-    /**
-     * Width and height of window
-     */
-    protected int width;
-    protected int height;
-
-    // has this been updated since the last time iterMatrix was computed?
-    protected boolean updated = true;
 
     /**
      * height x width, with origin (0,0) in to left corner
      */
     private int[][] iterMatrix;
 
-    /**
-     * How much to zoom in/out by
-     */
-    protected final double zoomInFactor = 0.66666666;
-    protected final double zoomOutFactor = 1.5;
-    protected double zoomDepth = 1.0;   // How far zoomed in are we?
-
     protected int maxIterations = 256;
 
     protected Color[] colors;
 
-    // Key related constants
-    protected Color keyBackground = new Color(156, 156, 156, 160);
-    protected Color keyBorder = new Color(32, 32, 220, 160);
     protected int keyLineSeparation = 3;
     protected int keyLineHeight = -1;
-    protected boolean showKey = true;
-
-    /**
-     * Number of pixels to move by when left/right/up/down is clicked
-     */
-    final double shiftAmount = 200;
-
-    /**
-     * The difference in x/y values between adjacent pixels.
-     *
-     * WARNING: This needs to be recalculated at EVERY screen resize!!
-     * This may be done with method calculateDeltas();
-     */
-    protected double delta;
-
-    /**
-     * These values define the visible region of the complex plain. Note that the y-values
-     * are derived from the x-values and the width/height.
-     */
-    double xMax = 1.2, yMax = 0.0, xMin = -2.1, yMin = 0.0, yCenter = 0.0;
 
     /**
      * This determines the colors of the colors
      */
-    ColorScheme colorScheme;
+    protected ColorScheme colorScheme;
 
-    JButton left ;
-    JButton right;
-    JButton up;
-    JButton down;
-    JButton in;
-    JButton out;
-    JButton increaseMaxIter;
-    JButton decreaseMaxIter;
-    JButton exit;
-    JButton toggleKey;
-
-    Map<JButton, String> buttonNames;
-
-
-    java.util.List<JButton> buttons;
+    private final JButton increaseMaxIter;
+    private final JButton decreaseMaxIter;
 
     protected ComplexFractal(int width, int height, ColorScheme colorScheme) {
-        this(width, height, colorScheme, -2.1, 1.2);
+        this(width, height, colorScheme, -2.1, 1.2, 1.1, 1.1);
     }
 
-    protected ComplexFractal(int width, int height, ColorScheme colorScheme, double xmin, double xmax) {
-        this.width = width;
-        this.height = height;
+    protected ComplexFractal(int width, int height, ColorScheme colorScheme, double xmin, double xmax,
+                             double ymin, double ymax) {
+        super(width, height, xmin, xmax, ymin, ymax);
         if (colorScheme == null) {
             colorScheme = new ColorScheme(2,155, 0, 0, 24, 0);
         }
@@ -120,57 +67,21 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         iterMatrix = new int[height][width];
         xMin = xmin;
         xMax = xmax;
-        buttons = new LinkedList<>();
 
-        buttonNames = new HashMap<>();
-        left  = new JButton("⇐"); buttonNames.put(left, "left");
-        right = new JButton("⇒"); buttonNames.put(right, "right");
-        up    = new JButton("⇑"); buttonNames.put(up, "up");
-        down  = new JButton("⇓"); buttonNames.put(down, "down");
-        in    = new JButton("\uD83D\uDD0E +"); buttonNames.put(in, "in");
-        out   = new JButton("\uD83D\uDD0E -"); buttonNames.put(out, "out");
-        exit  = new JButton("✗"); buttonNames.put(exit, "exit");
-        increaseMaxIter = new JButton("▩"); buttonNames.put(increaseMaxIter, "increaseMaxIter");
-        decreaseMaxIter = new JButton("□"); buttonNames.put(decreaseMaxIter, "decreaseMaxIter");
-        toggleKey = new JButton("toggleKey"); buttonNames.put(toggleKey, "toggleKey");
-
-        addButton(left, right, up, down, in, out, increaseMaxIter, decreaseMaxIter, toggleKey, exit);
-        setPreferredSize(new Dimension(width, height));
+        increaseMaxIter = registerButton("▩", "increaseMaxIter");
+        decreaseMaxIter = registerButton("□", "decreaseMaxIter");
+        setPreferredSize(new Dimension(this.width, this.height));
         calculateDeltas();
 
         updateColors();
     }
 
-    /**
-     * Track buttons, adding them to the buttons list and to the
-     * @param bs
-     */
-    protected void addButton(JButton ... bs ) {
-        for (JButton b : bs) {
-            buttons.add(b);
-            add(b);
-            b.addActionListener(this);
-        }
-    }
 
     /**
      * Get a point in the complex plane from a pixel position.
      */
     protected Complex pointFromPixel(int x, int y) {
         return new Complex(xMin + delta * x, yMax - delta * y);
-    }
-
-    /**
-     * After a window resize or shift, recalculate derived data.
-     */
-    protected void calculateDeltas() {
-        // First, calculate delta
-        delta = (xMax - xMin) / width;
-
-        // Then, calculate yMin and yMax
-        double yRange = delta * height / 2;
-        yMax = yCenter + yRange;
-        yMin = yCenter - yRange;
     }
 
     /**
@@ -185,86 +96,6 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
         return calculateIterations(pt, maxIterations);
     }
 
-    public void actionPerformed(ActionEvent e){
-        System.out.println("ActionEvent: " + e.getActionCommand());
-        System.out.println(">>> updated = " + updated);
-        final Object source = e.getSource();
-        if (source instanceof JButton) {
-            System.out.println("Button: " + buttonNames.get((JButton) source));
-        }
-        if (source == left) {
-            double shift = delta * shiftAmount;
-            xMax -= shift;
-            xMin -= shift;
-            updated = true;
-
-        } else if (source == right) {
-            double shift = delta * shiftAmount;
-            xMax += shift;
-            xMin += shift;
-            updated = true;
-
-        } else if (source == up) {
-            double shift = delta * shiftAmount;
-            yCenter += shift;
-            updated = true;
-
-        } else if (source == down) {
-            double shift = delta * shiftAmount;
-            yCenter -= shift;
-            updated = true;
-        } else if (source == in) {
-            double center = (xMin + xMax) / 2;
-            double diff = xMax - center;
-            xMin = center - zoomInFactor * diff ;
-            xMax = center + zoomInFactor * diff ;
-
-            center = (yMin + yMax) / 2;
-            diff = yMax - center;
-            yMin = center - zoomInFactor * diff ;
-            yMax = center + zoomInFactor * diff ;
-            zoomDepth *= zoomOutFactor;
-            updated = true;
-        } else if (source == out) {
-            double center = (xMin + xMax) / 2;
-            double diff = xMax - center;
-            xMin = center - zoomOutFactor * diff ;
-            xMax = center + zoomOutFactor * diff ;
-
-            center = (yMin + yMax) / 2;
-            diff = yMax - center;
-            yMin = center - zoomOutFactor * diff ;
-            yMax = center + zoomOutFactor * diff ;
-            zoomDepth *= zoomInFactor;
-            updated = true;
-        } else if (source == exit) {
-            try {
-                final String d = (new SimpleDateFormat("-dd-MM-yyyy_HH-mm-ss")).format(new Date());
-                System.out.println("Writing file");
-                writeToImage(fractalName + d, "png");
-                System.out.println("done! ");
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            System.exit(0);
-        }
-        else if (source == increaseMaxIter) {
-            maxIterations = maxIterations < 64 ? 64 : maxIterations + 64;
-            updateColors();
-            updated = true;
-        }
-        else if (source == decreaseMaxIter) {
-            maxIterations = maxIterations < 64 ? 128: maxIterations - 64;
-        } else if (source == toggleKey) {
-            showKey = ! showKey;
-            System.out.println("showKey = " + showKey);
-            updated = true;
-        }
-
-        System.out.println("<<< updated = " + updated);
-        calculateDeltas();
-        if(updated) repaint();
-    }
 
     public void compute() {
         System.out.println("compute: updated="+updated);
@@ -418,6 +249,27 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
                     ", heightEnd=" + heightEnd +
                     '}';
         }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        System.out.println("ActionEvent: " + e.getActionCommand());
+        System.out.println(">>> updated = " + updated);
+
+        final Object source = e.getSource();
+
+        if (source instanceof JButton) {
+            System.out.println("Button: " + getButtonName((JButton) source));
+        }
+        if (source == increaseMaxIter) {
+            maxIterations = maxIterations < 64 ? 64 : maxIterations + 64;
+            updateColors();
+            updated = true;
+        }
+        else if (source == decreaseMaxIter) {
+            maxIterations = maxIterations < 64 ? 128: maxIterations - 64;
+        }
+        super.actionPerformed(e);
     }
 
     public BufferedImage createBufferedImage() {
