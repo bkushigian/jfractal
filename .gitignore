@@ -1,5 +1,7 @@
 .gradle/
 .idea/
 build/
-./*.png
-./*.jpg
+*.png
+*.jpg
+!img/*.png
+!img/*.jpg
