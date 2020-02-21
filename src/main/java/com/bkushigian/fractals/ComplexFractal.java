@@ -311,11 +311,8 @@ public abstract class ComplexFractal extends JPanel implements ActionListener {
      * @return the color corresponding to {@code colorNumber}
      */
     public Color getColor(int colorNumber) {
-        if (maxIterations != 0) {
-            final int c = colorNumber % maxIterations;
-            return colors[c];
-        }
-        return colors[0];
+        final int c = colorNumber % maxIterations;
+        return colors[c];
     }
 
     protected void drawKey(Graphics g) {
