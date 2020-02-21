@@ -52,13 +52,17 @@ public class Julia extends ComplexFractal {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == moveCUp) {
+            updated = true;
             c = new Complex(c.re, c.im + cDelta);
         } else if (e.getSource() == moveCDown) {
+            updated = true;
             c = new Complex(c.re, c.im - cDelta);
         }
         else if (e.getSource() == moveCLeft) {
+            updated = true;
             c = new Complex(c.re - cDelta, c.im);
         } else if (e.getSource() == moveCRight) {
+            updated = true;
             c = new Complex(c.re + cDelta, c.im);
         } else if (e.getSource() == increaseCDelta) {
             cDelta *= 2;
